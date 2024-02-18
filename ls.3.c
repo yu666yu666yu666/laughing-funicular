@@ -270,4 +270,5 @@ int main(int argc, char **argv)
         print_dir(dir_path, show_hidden, show_details, recursive, sort_by_time, reverse_sort, show_inode, show_size);
     }
     return 0;
+    
 }
