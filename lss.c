@@ -322,7 +322,7 @@ void l_t(char** filenames) {
 void l_r(char** arr, int file_cnt) {
     char left = 0;              
     char right = file_cnt - 1;  
-    char temp;
+    char* temp;
     while (left < right) {
         char* temp = arr[left];
         arr[left] = arr[right];
