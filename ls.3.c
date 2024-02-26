@@ -15,6 +15,149 @@ int cmp_file_time(const void *a, const void *b);/*比较两个文件的修改时
 int cmp_file_name(const void *a, const void *b);/*比较两个文件的名称*/
 int cmp_file_size(const void *a, const void *b);/*比较两个文件的大小*/
 
+int main(int argc, char **argv) 
+{
+    int show_hidden = 0;
+    int show_details = 0;
+    int recursive = 0;
+    int sort_by_time = 0;
+    int reverse_sort = 0;
+    int show_inode = 0;
+    int show_size = 0;
+    char *dir_path;
+    int i;
+    for (i = 1; i < argc; i++) 
+    {
+        if (strcmp(argv[i], "-a") == 0) 
+        {
+            show_hidden = 1;
+        } else if (strcmp(argv[i], "-l") == 0) 
+        {
+            show_details = 1;
+        } else if (strcmp(argv[i], "-R") == 0) 
+        {
+            recursive = 1;
+        } else if (strcmp(argv[i], "-t") == 0) 
+        {
+            sort_by_time = 1;
+        } else if (strcmp(argv[i], "-r") == 0) 
+        {
+            reverse_sort = 1;
+        } else if (strcmp(argv[i], "-i") == 0) 
+        {
+            show_inode = 1;
+        } else if (strcmp(argv[i], "-s") == 0) 
+        {
+            show_size = 1;
+        } else 
+        {
+            dir_path = argv[i];
+        }
+    }
+    if (!dir_path) 
+    {
+        dir_path = ".";
+    }
+    struct dirent **namelist;
+    int n = scandir(dir_path, &namelist, NULL, alphasort);/*获取目录下的文件列表*/
+    if (n == -1) 
+    {
+        printf("Error: cannot open directory %s\n", dir_path);
+        return 1;
+    }
+    if (sort_by_time) 
+    {
+        qsort(namelist, n, sizeof(struct dirent *), cmp_file_time);
+    } else 
+    {
+        qsort(namelist, n, sizeof(struct dirent *), cmp_file_name);
+    }
+    if (reverse_sort) 
+    {
+        for (i = n - 1; i >= 0; i--) 
+        {
+            char path[MAX_PATH];
+            snprintf(path, MAX_PATH, "%s/%s", dir_path, namelist[i]->d_name);
+            struct stat file_stat;
+            if (lstat(path, &file_stat) == -1) 
+            {
+                printf("Error: cannot get file status for %s\n", path);
+                continue;
+            }
+            if (show_inode) 
+            {
+                printf("%ld ", (long)file_stat.st_ino);
+            }
+            if (show_size) 
+            {
+                printf("%ld ", (long)file_stat.st_blocks);
+            }
+            if (show_details) 
+            {
+                print_file_info(namelist[i]->d_name, &file_stat, show_inode, show_size);
+            } else 
+            {
+                if (S_ISDIR(file_stat.st_mode)) 
+                {
+                    printf("\033[1;34m%s/\033[0m", namelist[i]->d_name);
+                } else if (S_ISLNK(file_stat.st_mode)) 
+                {
+                    printf("\033[1;36m%s@\033[0m", namelist[i]->d_name);
+                } else 
+                {
+                    printf("%s", namelist[i]->d_name);
+                }
+                printf(" ");
+            }
+        }
+    } else 
+    {
+        for (i = 0; i < n; i++) 
+        {
+            char path[MAX_PATH];
+            snprintf(path, MAX_PATH, "%s/%s", dir_path, namelist[i]->d_name);
+            struct stat file_stat;
+            if (lstat(path, &file_stat) == -1) 
+            {
+                printf("Error: cannot get file status for %s\n", path);
+                continue;
+            }
+            if (show_inode) 
+            {
+                printf("%ld ", (long)file_stat.st_ino);
+            }
+            if (show_size) 
+            {
+                printf("%ld ", (long)file_stat.st_blocks);
+            }
+            if (show_details) 
+            {
+                print_file_info(namelist[i]->d_name, &file_stat, show_inode, show_size);
+            } else 
+            {
+                if (S_ISDIR(file_stat.st_mode)) 
+                {
+                    printf("\033[1;34m%s/\033[0m", namelist[i]->d_name);
+                } else if (S_ISLNK(file_stat.st_mode)) 
+                {
+                    printf("\033[1;36m%s@\033[0m", namelist[i]->d_name);
+                } else 
+                {
+                    printf("%s", namelist[i]->d_name);
+                }
+                printf(" ");
+            }
+        }
+    }
+    printf("\n");
+    
+    if (recursive) 
+    {
+        print_dir(dir_path, show_hidden, show_details, recursive, sort_by_time, reverse_sort, show_inode, show_size);
+    }
+    return 0;
+}
+
 void print_file_info(const char *path, const struct stat *file_stat, int show_inode, int show_size) 
 {
     char mode_str[11];
@@ -130,145 +273,4 @@ int cmp_file_size(const void *a, const void *b)
     return ((struct stat *)b)->st_size - ((struct stat *)a)->st_size;
 }
 
-int main(int argc, char **argv) 
-{
-    int show_hidden = 0;
-    int show_details = 0;
-    int recursive = 0;
-    int sort_by_time = 0;
-    int reverse_sort = 0;
-    int show_inode = 0;
-    int show_size = 0;
-    char *dir_path;
-    int i;
-    for (i = 1; i < argc; i++) 
-    {
-        if (strcmp(argv[i], "-a") == 0) 
-        {
-            show_hidden = 1;
-        } else if (strcmp(argv[i], "-l") == 0) 
-        {
-            show_details = 1;
-        } else if (strcmp(argv[i], "-R") == 0) 
-        {
-            recursive = 1;
-        } else if (strcmp(argv[i], "-t") == 0) 
-        {
-            sort_by_time = 1;
-        } else if (strcmp(argv[i], "-r") == 0) 
-        {
-            reverse_sort = 1;
-        } else if (strcmp(argv[i], "-i") == 0) 
-        {
-            show_inode = 1;
-        } else if (strcmp(argv[i], "-s") == 0) 
-        {
-            show_size = 1;
-        } else 
-        {
-            dir_path = argv[i];
-        }
-    }
-    if (!dir_path) 
-    {
-        dir_path = ".";
-    }
-    struct dirent **namelist;
-    int n = scandir(dir_path, &namelist, NULL, alphasort);
-    if (n == -1) 
-    {
-        printf("Error: cannot open directory %s\n", dir_path);
-        return 1;
-    }
-    if (sort_by_time) 
-    {
-        qsort(namelist, n, sizeof(struct dirent *), cmp_file_time);
-    } else 
-    {
-        qsort(namelist, n, sizeof(struct dirent *), cmp_file_name);
-    }
-    if (reverse_sort) 
-    {
-        for (i = n - 1; i >= 0; i--) 
-        {
-            char path[MAX_PATH];
-            snprintf(path, MAX_PATH, "%s/%s", dir_path, namelist[i]->d_name);
-            struct stat file_stat;
-            if (lstat(path, &file_stat) == -1) 
-            {
-                printf("Error: cannot get file status for %s\n", path);
-                continue;
-            }
-            if (show_inode) 
-            {
-                printf("%ld ", (long)file_stat.st_ino);
-            }
-            if (show_size) 
-            {
-                printf("%ld ", (long)file_stat.st_blocks);
-            }
-            if (show_details) 
-            {
-                print_file_info(namelist[i]->d_name, &file_stat, show_inode, show_size);
-            } else 
-            {
-                if (S_ISDIR(file_stat.st_mode)) 
-                {
-                    printf("\033[1;34m%s/\033[0m", namelist[i]->d_name);
-                } else if (S_ISLNK(file_stat.st_mode)) 
-                {
-                    printf("\033[1;36m%s@\033[0m", namelist[i]->d_name);
-                } else 
-                {
-                    printf("%s", namelist[i]->d_name);
-                }
-                printf(" ");
-            }
-        }
-    } else 
-    {
-        for (i = 0; i < n; i++) 
-        {
-            char path[MAX_PATH];
-            snprintf(path, MAX_PATH, "%s/%s", dir_path, namelist[i]->d_name);
-            struct stat file_stat;
-            if (lstat(path, &file_stat) == -1) 
-            {
-                printf("Error: cannot get file status for %s\n", path);
-                continue;
-            }
-            if (show_inode) 
-            {
-                printf("%ld ", (long)file_stat.st_ino);
-            }
-            if (show_size) 
-            {
-                printf("%ld ", (long)file_stat.st_blocks);
-            }
-            if (show_details) 
-            {
-                print_file_info(namelist[i]->d_name, &file_stat, show_inode, show_size);
-            } else 
-            {
-                if (S_ISDIR(file_stat.st_mode)) 
-                {
-                    printf("\033[1;34m%s/\033[0m", namelist[i]->d_name);
-                } else if (S_ISLNK(file_stat.st_mode)) 
-                {
-                    printf("\033[1;36m%s@\033[0m", namelist[i]->d_name);
-                } else 
-                {
-                    printf("%s", namelist[i]->d_name);
-                }
-                printf(" ");
-            }
-        }
-    }
-    printf("\n");
-    
-    if (recursive) 
-    {
-        print_dir(dir_path, show_hidden, show_details, recursive, sort_by_time, reverse_sort, show_inode, show_size);
-    }
-    return 0;
-}
+
