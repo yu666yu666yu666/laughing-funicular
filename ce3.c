@@ -312,7 +312,7 @@ void showall() {
 
 	//循环输出
 	for (p = head; p != NULL; p = p->next) {
-		printf("Name:%-8s Color:%-8s Style:%-8s Price:%-8lf Inventory:%-8d\n", p->name, p->color, p->style, p->price, p->inventory);
+		printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", p->name, p->color, p->style, p->price, p->inventory);
 	}
 }
 
