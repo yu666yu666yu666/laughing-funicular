@@ -57,9 +57,11 @@ int main(void) {
 }
 
 void menu() {
-	int i,m=0;
+	int i, m = 0;
+
 	do {
 		m = 0;
+
 		printf("Clothing sales Managment System[version: 38]\n");
 		printf("yu\n\n\n");
 		//菜单界面
@@ -94,7 +96,7 @@ int login() {
 	char user[20];
 	char pw[20];
 	// count为密码尝试次数
-	int count = 0, i = 0,m;
+	int count = 0, i = 0, m;
 
 	//管理员账户密码设定
 	char user1[20] = "yu";
@@ -130,7 +132,7 @@ int login() {
 
 		//判断用户名和密码是否正确，正确跳转管理员界面
 		if (strcmp(user, user1) == 0 && strcmp(pw, pw1) == 0) {
-			m=menu_admin();
+			m = menu_admin();
 			if (m == 3) {
 				return 3;
 			}
@@ -691,7 +693,7 @@ void search_menu() {
 			break;
 			//返回上一级
 		case 5:
-			return ;
+			return;
 			//退出程序
 		case 0:
 			exit(3);
@@ -726,7 +728,7 @@ void search_direct() {
 }
 
 void search_color() {
-	struct Product* head = NULL, * temp = NULL;
+	struct Product* head = NULL;
 	char color[30];
 	int m = 0;
 	//加载文件
@@ -742,21 +744,21 @@ void search_color() {
 	{
 		if (strcmp(color, cur->color) == 0)
 		{
-			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", temp->name, temp->color, temp->style, temp->price, temp->inventory);
+			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", cur->name, cur->color, cur->style, cur->price, cur->inventory);
 			m++;
 		}
 	}
-	if(m==0) {
+	if (m == 0) {
 		printf("ITEM NOT EXIST!");
-		return ;
+		return;
 	}
 	else {
-		printf("There are %d pieces of %s clothing in total.\n",m,color);
+		printf("There are %d pieces of %s clothing in total.\n", m, color);
 	}
 }
 
 void search_style() {
-	struct Product* head = NULL, * temp = NULL;
+	struct Product* head = NULL;
 	char style[30];
 	int m = 0;
 	//加载文件
@@ -772,21 +774,21 @@ void search_style() {
 	{
 		if (strcmp(style, cur->style) == 0)
 		{
-			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", temp->name, temp->color, temp->style, temp->price, temp->inventory);
+			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", cur->name, cur->color, cur->style, cur->price, cur->inventory);
 			m++;
 		}
 	}
-	if(m==0) {
+	if (m == 0) {
 		printf("ITEM NOT EXIST!");
-		return ;
+		return;
 	}
 	else {
-		printf("There are %d pieces of %s in total.\n",m,style);
+		printf("There are %d pieces of %s in total.\n", m, style);
 	}
 }
 
 void color_style_composite_search() {
-	struct Product* head = NULL, * temp = NULL;
+	struct Product* head = NULL;
 	char style[30];
 	char color[30];
 	int m = 0;
@@ -804,18 +806,18 @@ void color_style_composite_search() {
 
 	for (struct Product* cur = head; cur != NULL; cur = cur->next)
 	{
-		if ((strcmp(style, cur->style) == 0)&&(strcmp(color, cur->color) == 0))
+		if ((strcmp(style, cur->style) == 0) && (strcmp(color, cur->color) == 0))
 		{
-			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", temp->name, temp->color, temp->style, temp->price, temp->inventory);
+			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", cur->name, cur->color, cur->style, cur->price, cur->inventory);
 			m++;
 		}
 	}
-	if(m==0) {
+	if (m == 0) {
 		printf("ITEM NOT EXIST!");
-		return ;
+		return;
 	}
 	else {
-		printf("There are %d pieces of %s %s in total.\n",m,color,style);
+		printf("There are %d pieces of %s %s in total.\n", m, color, style);
 	}
 }
 
@@ -868,63 +870,11 @@ void sale() {
 }
 
 void sort_h_l() {
-	struct Product *pre,*p,*tail,*t,*m,*head = NULL;
-	head = load(DIR);
-	m->next=head;
-	tail=NULL;//置空尾节点
-	while((m->next)!=tail) //没有到达最后则一直循环
-	{
-	    pre=m;//临时头结点 
-		p=m->next;		
-		t=p->next; 
-		while(p->next!=tail) 
-		 {
-			if((p->price)<(t->price)) {
-				//交换节点 
-				pre->next=t;
-				p->next=t->next;
-				t->next=p;
-			}
-			else{
-			    p=p->next;
-			}
-			t=p->next;
-			//p,t如果交换了节点，p已经后移了，否则p在else里后移，所以t赋值p->next就行了 
-			pre=pre->next;
-		}
-		tail=p;
-	}
-	showall();
+
 }
 
 void sort_l_h() {
-	struct Product *pre,*p,*tail,*t,*m *head = NULL;
-	head = load(DIR);
-	m->next=head;
-	tail=NULL;//置空尾节点 
-	while((m->next)!=tail) //没有到达最后则一直循环 
-	{
-	    pre=m;//临时头结点 
-		p=m->next;		
-		t=p->next; 
-		while(p->next!=tail) 
-		 {
-			if((p->price)>(t->price)) {
-				//交换节点 
-				pre->next=t;
-				p->next=t->next;
-				t->next=p;
-			}
-			else{
-			    p=p->next;
-			}
-			t=p->next;
-			//p,t如果交换了节点，p已经后移了，否则p在else里后移，所以t赋值p->next就行了 
-			pre=pre->next;
-		}
-		tail=p;
-	}
-	showall();
+
 }
 
 void save(struct Product* head, const char* filename) {
