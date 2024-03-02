@@ -314,7 +314,7 @@ struct Product* load(const char* filename) {
 	//文件存在，依次录入链表，返回头节点 head
 	struct Product buf, * head = NULL;
 
-	while (fscanf(fp, "%s %s %s %lf %d", buf.name, buf.color, buf.style, &buf.price, &buf.inventory) > 0) {
+	while (fscanf(fp, "%s %s %s %lf %d\n", buf.name, buf.color, buf.style, &buf.price, &buf.inventory) > 0) {
 		head = add(head, buf.name, buf.color, buf.style, buf.price, buf.inventory);
 	}
 	return head;
@@ -870,11 +870,99 @@ void sale() {
 }
 
 void sort_h_l() {
+	struct Product* head = load(DIR);
+	int swapped;
+	struct Product* ptr1, * lptr = NULL;
 
+	if (head == NULL) {
+		return; // 空列表，不排序
+	}
+
+	do {
+		swapped = 0;
+		ptr1 = head;
+
+		while (ptr1->next != lptr) {
+			if (ptr1->price < ptr1->next->price) { // 如果当前项的价格小于下一项，交换它们
+				double tempPrice = ptr1->price;
+				ptr1->price = ptr1->next->price;
+				ptr1->next->price = tempPrice;
+
+				int tempInventory = ptr1->inventory;
+				ptr1->inventory = ptr1->next->inventory;
+				ptr1->next->inventory = tempInventory;
+
+				char tempName[20], tempColor[20], tempStyle[20];
+				strcpy(tempName, ptr1->name);
+				strcpy(tempColor, ptr1->color);
+				strcpy(tempStyle, ptr1->style);
+
+				strcpy(ptr1->name, ptr1->next->name);
+				strcpy(ptr1->color, ptr1->next->color);
+				strcpy(ptr1->style, ptr1->next->style);
+
+				strcpy(ptr1->next->name, tempName);
+				strcpy(ptr1->next->color, tempColor);
+				strcpy(ptr1->next->style, tempStyle);
+
+				swapped = 1;
+			}
+			ptr1 = ptr1->next;
+		}
+		lptr = ptr1;
+	} while (swapped);
+
+	save(head, DIR); // 保存排序后的列表到文件
+	printf("Products sorted from highest to lowest price.\n");
+	showall();
 }
 
 void sort_l_h() {
+	struct Product* head = load(DIR);
+	int swapped;
+	struct Product* ptr1, * lptr = NULL;
 
+	if (head == NULL) {
+		return; // 空列表，不排序
+	}
+
+	do {
+		swapped = 0;
+		ptr1 = head;
+
+		while (ptr1->next != lptr) {
+			if (ptr1->price > ptr1->next->price) { // 如果当前项的价格大于下一项，交换它们
+				double tempPrice = ptr1->price;
+				ptr1->price = ptr1->next->price;
+				ptr1->next->price = tempPrice;
+
+				int tempInventory = ptr1->inventory;
+				ptr1->inventory = ptr1->next->inventory;
+				ptr1->next->inventory = tempInventory;
+
+				char tempName[20], tempColor[20], tempStyle[20];
+				strcpy(tempName, ptr1->name);
+				strcpy(tempColor, ptr1->color);
+				strcpy(tempStyle, ptr1->style);
+
+				strcpy(ptr1->name, ptr1->next->name);
+				strcpy(ptr1->color, ptr1->next->color);
+				strcpy(ptr1->style, ptr1->next->style);
+
+				strcpy(ptr1->next->name, tempName);
+				strcpy(ptr1->next->color, tempColor);
+				strcpy(ptr1->next->style, tempStyle);
+
+				swapped = 1;
+			}
+			ptr1 = ptr1->next;
+		}
+		lptr = ptr1;
+	} while (swapped);
+
+	save(head, DIR); // 保存排序后的列表到文件
+	printf("Products sorted from lowest to highest price.\n");
+	showall();
 }
 
 void save(struct Product* head, const char* filename) {
