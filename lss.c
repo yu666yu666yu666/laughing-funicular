@@ -23,7 +23,7 @@
 
 void l_myls();
 int l_name(char dirname[]);
-void l_r(char** filenames, int file_cnt);
+void l_r(char** filenames, int files);
 void l_i(char filename[]);
 void l_s(char filename[]);
 void l_t(char** filenames);
@@ -94,22 +94,21 @@ void l_myls() {
         if (l_name(dirname[i]) == -1) {
             continue;
         }
-        if ((i_f & t) == t) {  // 时间排序
+        if ((i_f & t) == t) {  
             l_t(filenames);
         }
-        if ((i_f & r) == r) {  // 逆序
+        if ((i_f & r) == r) {  
             l_r(filenames, files);
         }
         printf("当前路径:\"%s\"\n", dirname[i]);
-        int tag = 0;  
+        int ge = 0;  
         for (int j = 0; j < files; j++) {
-            
             char path[4096] = {0};
             strcpy(path, dirname[i]);
             int len = strlen(dirname[i]);
             strcpy(&path[len], "/");
             strcpy(&path[len + 1], filenames[j]);
-            tag++;
+            ge++;
             if ((i_f & a) == 0) {
                 if ((strcmp(filenames[j], ".") == 0 ||
                      strcmp(filenames[j], "..") == 0) ||
@@ -134,7 +133,7 @@ void l_myls() {
                 l_s(path);
             }
             if ((i_f & l) == 0) {
-                if (S_ISDIR(info.st_mode))  // 判断是否为目录
+                if (S_ISDIR(info.st_mode)) 
                 {
                     printf(GREEN "%s\t" NONE, filenames[j]);
                 } 
@@ -146,7 +145,7 @@ void l_myls() {
                 char modestr[11];
                 mode_to_letters(info.st_mode, modestr);
                 printf("%s %4d %-8s %-8s %8ld %.12s ", modestr,(int)info.st_nlink,uid_to_name(info.st_uid),gid_to_name(info.st_gid),(long)info.st_size,ctime(&info.st_mtime));
-                if (S_ISDIR(info.st_mode))  // 判断是否为目录
+                if (S_ISDIR(info.st_mode))  
                 {
                     printf(GREEN "%s\t" NONE, filenames[j]);
                 } 
@@ -155,7 +154,7 @@ void l_myls() {
                 }
                 printf("\n");
             }
-            if ((tag % 5 == 0) && ((i_f & l) == 0)) {
+            if ((ge % 5 == 0) && ((i_f & l) == 0)) {
                 printf("\n");
             }
         }
@@ -212,9 +211,9 @@ void l_t(char** filenames) {
         }
     }
 }
-void l_r(char** arr, int file_cnt) {
+void l_r(char** arr, int files) {
     char left = 0;              
-    char right = file_cnt - 1;  
+    char right = files - 1;  
     char* temp;
     while (left < right) {
         char* temp = arr[left];
