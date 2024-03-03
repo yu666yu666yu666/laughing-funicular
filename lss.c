@@ -21,10 +21,7 @@
 #define GREEN "\033[0;32;32m"
 #define BLUE "\033[0;32;34m"
 
-void get_(int argc, char* argv[]);
-void restored_ls(struct dirent* cur_item);
 void sort(char** filenames, int start, int end);
-void l_r(char** filenames, int file_cnt);
 int partition(char** filenames, int start, int end);
 void swap(char** s1, char** s2);
 int compare(char* s1, char* s2);
@@ -32,7 +29,7 @@ char* uid_to_name(uid_t);
 char* gid_to_name(gid_t);
 void mode_to_letters(int, char[]);
 char* uid_to_name(uid_t);
-
+void l_r(char** filenames, int file_cnt);
 void l_i(char filename[]);
 void l_s(char filename[]);
 int l_name(char dirname[]);
@@ -44,7 +41,50 @@ int dirlen = 0;
 char* filenames[4096 * 128];
 int file_cnt = 0;
 int main(int argc, char* argv[]) {
-    get_(argc, argv);
+    for (int i = 1; i < argc; i++) {
+        if (argv[i][0] !=
+            '-') {  // 只接受以'-'开头的参数
+            char* tempdirname = (char*)malloc(sizeof(char) * 4096);
+            strcpy(tempdirname, argv[i]);
+            dirname[dirlen++] = tempdirname;
+        } else {
+            int len = strlen(argv[i]);
+            for (int j = 1; j < len; j++) {
+                switch (argv[i][j]) {
+                    case 'a':
+                        i_f |= a;
+                        break;
+                    case 'l':
+                        i_f |= l;
+                        break;
+                    case 'R':
+                        i_f |= R;
+                        break;
+                    case 't':
+                        i_f |= t;
+                        break;
+                    case 'r':
+                        i_f |= r;
+                        break;
+                    case 'i':
+                        i_f |= I;
+                        break;
+                    case 's':
+                        i_f |= s;
+                        break;
+                    default:
+                        fprintf(stderr, "%c参数错误!\n", argv[i][j]);
+                        break;
+                }
+            }
+        }
+    }
+    if (dirlen == 0) {
+        dirlen = 1;
+        char* tempdirname = (char*)malloc(sizeof(char) * 2048);
+        strcpy(tempdirname, ".");
+        dirname[0] = tempdirname;
+    }
     l_myls();
     return 0;
 }
@@ -53,7 +93,6 @@ void l_myls() {
         if (l_name(dirname[i]) == -1) {
             continue;
         }
-        
         if ((i_f & t) == t) {  // 时间排序
             l_t(filenames);
         }
@@ -131,51 +170,25 @@ void l_myls() {
         file_cnt = 0;
     }
 }
-void get_(int argc, char* argv[]) {
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] !=
-            '-') {  // 只接受以'-'开头的参数
-            char* tempdirname = (char*)malloc(sizeof(char) * 4096);
-            strcpy(tempdirname, argv[i]);
-            dirname[dirlen++] = tempdirname;
-        } else {
-            int len = strlen(argv[i]);
-            for (int j = 1; j < len; j++) {
-                switch (argv[i][j]) {
-                    case 'a':
-                        i_f |= a;
-                        break;
-                    case 'l':
-                        i_f |= l;
-                        break;
-                    case 'R':
-                        i_f |= R;
-                        break;
-                    case 't':
-                        i_f |= t;
-                        break;
-                    case 'r':
-                        i_f |= r;
-                        break;
-                    case 'i':
-                        i_f |= I;
-                        break;
-                    case 's':
-                        i_f |= s;
-                        break;
-                    default:
-                        fprintf(stderr, "%c参数错误!\n", argv[i][j]);
-                        break;
-                }
-            }
+int l_name(char dirname[]) {
+    int i = 0;
+    int len = 0;
+    DIR* dir_ptr;
+    struct dirent* direntp;
+    if ((dir_ptr = opendir(dirname)) == NULL) {
+        fprintf(stderr, "权限不够,cannot open: %s\n", dirname);
+        return -1;
+    } else {
+        while ((direntp = readdir(dir_ptr))) {
+            char* result = (char*)malloc(sizeof(char) * 4096);
+            strcpy(result, direntp->d_name);
+            filenames[file_cnt++] = result;
         }
+        sort(filenames, 0, file_cnt - 1);
     }
-    if (dirlen == 0) {
-        dirlen = 1;
-        char* tempdirname = (char*)malloc(sizeof(char) * 2048);
-        strcpy(tempdirname, ".");
-        dirname[0] = tempdirname;
-    }
+    printf("\n");
+    closedir(dir_ptr);
+    return 1;
 }
 void l_i(char filename[]) {
     struct stat info;
@@ -189,23 +202,33 @@ void l_s(char filename[]) {
         perror(filename);
     printf("%4llu\t", info.st_size / 4096 * 4 + (info.st_size % 4096 ? 4 : 0));
 }
-int l_name(char dirname[]) {
-    int i = 0;
-    int len = 0;
-    DIR* dir_ptr;
-    struct dirent* direntp;
-    if ((dir_ptr = opendir(dirname)) == NULL) {
-        fprintf(stderr, "权限不够,cannot open: %s\n", dirname);
-        return -1;
-    } else {
-        while ((direntp = readdir(dir_ptr))) {
-            restored_ls(direntp);
+void l_t(char** filenames) {
+    char temp[2048] = {0};
+    struct stat info1;
+    struct stat info2;
+    for (int i = 0; i < file_cnt - 1; i++) {
+        for (int j = i + 1; j < file_cnt; j++) {
+            stat(filenames[i], &info1);
+            stat(filenames[j], &info2);
+            if (info1.st_mtime < info2.st_mtime) {
+                strcpy(temp, filenames[i]);
+                strcpy(filenames[i], filenames[j]);
+                strcpy(filenames[j], temp);
+            }
         }
-        sort(filenames, 0, file_cnt - 1);
     }
-    printf("\n");
-    closedir(dir_ptr);
-    return 1;
+}
+void l_r(char** arr, int file_cnt) {
+    char left = 0;              
+    char right = file_cnt - 1;  
+    char* temp;
+    while (left < right) {
+        char* temp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = temp;
+        left++;   
+        right--; 
+    }
 }
 void sort(char** filenames, int start, int end) {
     if (start < end) {
@@ -248,11 +271,6 @@ int compare(char* s1, char* s2) {
     }
     return *s1 - *s2;
 }
-void restored_ls(struct dirent* cur_item) {
-    char* result = (char*)malloc(sizeof(char) * 4096);
-    strcpy(result, cur_item->d_name);
-    filenames[file_cnt++] = result;
-}
 void mode_to_letters(int mode, char str[]) {
     strcpy(str, "----------");
     if (S_ISDIR(mode))
@@ -267,14 +285,12 @@ void mode_to_letters(int mode, char str[]) {
         str[2] = 'w';
     if (mode & S_IXUSR)
         str[3] = 'x';
-
     if (mode & S_IRGRP)
         str[4] = 'r';
     if (mode & S_IWGRP)
         str[5] = 'w';
     if (mode & S_IXGRP)
         str[6] = 'x';
-
     if (mode & S_IROTH)
         str[7] = 'r';
     if (mode & S_IWOTH)
@@ -288,7 +304,8 @@ char* gid_to_name(gid_t gid) {
     if ((grp_ptr = getgrgid(gid)) == NULL) {
         sprintf(numstr, "%d", gid);
         return numstr;
-    } else {
+    } 
+    else {
         return grp_ptr->gr_name;
     }
 }
@@ -299,35 +316,8 @@ char* uid_to_name(gid_t uid) {
     if ((pw_ptr = getpwuid(uid)) == NULL) {
         sprintf(numstr, "%d", uid);
         return numstr;
-    } else {
+    } 
+    else {
         return pw_ptr->pw_name;
-    }
-}
-void l_t(char** filenames) {
-    char temp[2048] = {0};
-    struct stat info1;
-    struct stat info2;
-    for (int i = 0; i < file_cnt - 1; i++) {
-        for (int j = i + 1; j < file_cnt; j++) {
-            stat(filenames[i], &info1);
-            stat(filenames[j], &info2);
-            if (info1.st_mtime < info2.st_mtime) {
-                strcpy(temp, filenames[i]);
-                strcpy(filenames[i], filenames[j]);
-                strcpy(filenames[j], temp);
-            }
-        }
-    }
-}
-void l_r(char** arr, int file_cnt) {
-    char left = 0;              
-    char right = file_cnt - 1;  
-    char* temp;
-    while (left < right) {
-        char* temp = arr[left];
-        arr[left] = arr[right];
-        arr[right] = temp;
-        left++;   
-        right--; 
     }
 }
