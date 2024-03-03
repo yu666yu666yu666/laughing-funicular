@@ -143,7 +143,6 @@ void l_myls() {
                 }
             }
             if ((i_f & l) == l) {
-                void mode_to_letters();
                 char modestr[11];
                 mode_to_letters(info.st_mode, modestr);
                 printf("%s %4d %-8s %-8s %8ld %.12s ", modestr,(int)info.st_nlink,uid_to_name(info.st_uid),gid_to_name(info.st_gid),(long)info.st_size,ctime(&info.st_mtime));
@@ -167,8 +166,7 @@ void l_myls() {
     }
 }
 int l_name(char dirname[]) {
-    int i = 0;
-    int len = 0;
+    int i = 0,len = 0;
     DIR* dir_ptr;
     struct dirent* direntp;
     if ((dir_ptr = opendir(dirname)) == NULL) {
