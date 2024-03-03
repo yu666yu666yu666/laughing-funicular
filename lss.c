@@ -9,6 +9,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#define NONE "\033[m"
+#define GREEN "\033[0;32;32m"
+#define BLUE "\033[0;32;34m"
+
 #define a 0b1000000
 #define l 0b0100000
 #define R 0b0010000
@@ -17,37 +21,34 @@
 #define I 0b0000010
 #define s 0b0000001
 
-#define NONE "\033[m"
-#define GREEN "\033[0;32;32m"
-#define BLUE "\033[0;32;34m"
-
-void sort(char** filenames, int start, int end);
-int partition(char** filenames, int start, int end);
-void swap(char** s1, char** s2);
-int compare(char* s1, char* s2);
+void l_myls();
+int l_name(char dirname[]);
+void l_r(char** filenames, int file_cnt);
+void l_i(char filename[]);
+void l_s(char filename[]);
+void l_t(char** filenames);
 char* uid_to_name(uid_t);
 char* gid_to_name(gid_t);
 void mode_to_letters(int, char[]);
 char* uid_to_name(uid_t);
-void l_r(char** filenames, int file_cnt);
-void l_i(char filename[]);
-void l_s(char filename[]);
-int l_name(char dirname[]);
-void l_myls();
-void l_t(char** filenames);
+void sort(char** filenames, int start, int end);
+int partition(char** filenames, int start, int end);
+void swap(char** s1, char** s2);
+int compare(char* s1, char* s2);
+
 int i_f = 0;
 char* dirname[4096 * 128];
 int dirlen = 0;
 char* filenames[4096 * 128];
-int file_cnt = 0;
+int files = 0;
 int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
-        if (argv[i][0] !=
-            '-') {  // 只接受以'-'开头的参数
-            char* tempdirname = (char*)malloc(sizeof(char) * 4096);
-            strcpy(tempdirname, argv[i]);
-            dirname[dirlen++] = tempdirname;
-        } else {
+        if (argv[i][0] !='-') {  
+            char* name = (char*)malloc(sizeof(char) * 4096);
+            strcpy(name, argv[i]);
+            dirname[dirlen++] = name;
+        } 
+        else {
             int len = strlen(argv[i]);
             for (int j = 1; j < len; j++) {
                 switch (argv[i][j]) {
@@ -81,9 +82,9 @@ int main(int argc, char* argv[]) {
     }
     if (dirlen == 0) {
         dirlen = 1;
-        char* tempdirname = (char*)malloc(sizeof(char) * 2048);
-        strcpy(tempdirname, ".");
-        dirname[0] = tempdirname;
+        char* name = (char*)malloc(sizeof(char) * 2048);
+        strcpy(name, ".");
+        dirname[0] = name;
     }
     l_myls();
     return 0;
@@ -97,11 +98,11 @@ void l_myls() {
             l_t(filenames);
         }
         if ((i_f & r) == r) {  // 逆序
-            l_r(filenames, file_cnt);
+            l_r(filenames, files);
         }
         printf("当前路径:\"%s\"\n", dirname[i]);
         int tag = 0;  
-        for (int j = 0; j < file_cnt; j++) {
+        for (int j = 0; j < files; j++) {
             
             char path[4096] = {0};
             strcpy(path, dirname[i]);
@@ -119,13 +120,12 @@ void l_myls() {
             struct stat info;
             stat(path, &info);  
             if (S_ISDIR(info.st_mode) && ((i_f & R) == R)) {
-                
-                char* tempdirname = (char*)malloc(sizeof(char) * 4096);
-                strcpy(tempdirname, dirname[i]);
-                int len = strlen(tempdirname);
-                strcpy(&tempdirname[len], "/");
-                strcpy(&tempdirname[len + 1], filenames[j]);
-                dirname[dirlen++] = tempdirname;
+                char* name = (char*)malloc(sizeof(char) * 4096);
+                strcpy(name, dirname[i]);
+                int len = strlen(name);
+                strcpy(&name[len], "/");
+                strcpy(&name[len + 1], filenames[j]);
+                dirname[dirlen++] = name;
             }
             if ((i_f & I) == I) {
                 l_i(path);
@@ -137,7 +137,8 @@ void l_myls() {
                 if (S_ISDIR(info.st_mode))  // 判断是否为目录
                 {
                     printf(GREEN "%s\t" NONE, filenames[j]);
-                } else {
+                } 
+                else {
                     printf(BLUE "%s\t" NONE, filenames[j]);
                 }
             }
@@ -145,16 +146,12 @@ void l_myls() {
                 void mode_to_letters();
                 char modestr[11];
                 mode_to_letters(info.st_mode, modestr);
-                printf("%s ", modestr);
-                printf("%4d ", (int)info.st_nlink);
-                printf("%-8s ", uid_to_name(info.st_uid));
-                printf("%-8s ", gid_to_name(info.st_gid));
-                printf("%8ld ", (long)info.st_size);
-                printf("%.12s ", ctime(&info.st_mtime));
+                printf("%s %4d %-8s %-8s %8ld %.12s ", modestr,(int)info.st_nlink,uid_to_name(info.st_uid),gid_to_name(info.st_gid),(long)info.st_size,ctime(&info.st_mtime));
                 if (S_ISDIR(info.st_mode))  // 判断是否为目录
                 {
                     printf(GREEN "%s\t" NONE, filenames[j]);
-                } else {
+                } 
+                else {
                     printf(BLUE "%s\t" NONE, filenames[j]);
                 }
                 printf("\n");
@@ -163,11 +160,10 @@ void l_myls() {
                 printf("\n");
             }
         }
-        // 清空
-        for (int k = 0; k < file_cnt; k++) {
+        for (int k = 0; k < files; k++) {
             memset(filenames[k], 4096, '\0');
         }
-        file_cnt = 0;
+        files = 0;
     }
 }
 int l_name(char dirname[]) {
@@ -182,9 +178,9 @@ int l_name(char dirname[]) {
         while ((direntp = readdir(dir_ptr))) {
             char* result = (char*)malloc(sizeof(char) * 4096);
             strcpy(result, direntp->d_name);
-            filenames[file_cnt++] = result;
+            filenames[files++] = result;
         }
-        sort(filenames, 0, file_cnt - 1);
+        sort(filenames, 0, files - 1);
     }
     printf("\n");
     closedir(dir_ptr);
@@ -206,8 +202,8 @@ void l_t(char** filenames) {
     char temp[2048] = {0};
     struct stat info1;
     struct stat info2;
-    for (int i = 0; i < file_cnt - 1; i++) {
-        for (int j = i + 1; j < file_cnt; j++) {
+    for (int i = 0; i < files - 1; i++) {
+        for (int j = i + 1; j < files; j++) {
             stat(filenames[i], &info1);
             stat(filenames[j], &info2);
             if (info1.st_mtime < info2.st_mtime) {
