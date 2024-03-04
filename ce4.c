@@ -344,7 +344,7 @@ void add_menu() {
 	char color[20];
 	char style[20];
 	double price;
-	int inventory;
+	int inventory,n = 0;
 
 	head = load(DIR);
 
@@ -357,6 +357,17 @@ void add_menu() {
 		printf("Product Name?\n");
 		fflush(stdin);
 		scanf("%s", name);
+		struct Product* h = head;
+		while (h!=NULL) {
+			if (strcmp(name, h->name) == 0) {
+				printf("The data already exists.\n");
+				n = 1;
+			}
+			h = h->next;
+		}
+		if (n) {
+			continue;
+		}
 		printf("Color?\n");
 		fflush(stdin);
 		scanf("%s", color);
