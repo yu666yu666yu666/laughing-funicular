@@ -13,9 +13,9 @@
 */
 
 struct Product {
-	char name[20]; //名字
-	char color[20]; //颜色
-	char style[20]; //类型风格
+	char name[200]; //名字
+	char color[200]; //颜色
+	char style[200]; //类型风格
 	double price; // 价格
 	int inventory; // 库存
 	struct Product* next;
@@ -30,8 +30,14 @@ int menu_admin();
 void load_menu();
 struct Product* load(const char* filename);
 void showall();
+void sort_h_l();
+void sort_l_h();
 void sale();
 void search_menu();
+void search_direct();
+void search_color();
+void search_style();
+void color_style_composite_search();
 struct Product* search(struct Product* head, const char* name);
 void add_menu();
 struct Product* add(struct Product* head, char* name, char* color, char* style, double price, int inventory);
@@ -51,21 +57,22 @@ int main(void) {
 }
 
 void menu() {
-	int i,m=0;
+	int i, m = 0;
+
 	do {
 		m = 0;
-		printf("Clothing sales Managment System[version: 38]\n");
-		printf("yu\n\n\n");
-		//菜单界面
+
+		printf("Clothing Sales Managment System\n");
+		printf("Yu's system\n\n");
 		printf("=============================================================================\n");
 		printf("1:> Administrator.\n");
 		printf("2:> Person.\n");
 		printf("0:> Exit.\n");
+		printf("=============================================================================\n\n");
 		printf("Please enter:");
 		fflush(stdin);
 		scanf("%d", &i);
 
-		//选择功能
 		switch (i) {
 			//去往管理员登录界面
 		case 1:
@@ -79,27 +86,28 @@ void menu() {
 		case 0:
 			exit(1);
 		default:
-			break;
+			printf("\nTry again!\n\n");
+			printf("----------------------------------------------------------------------------------------------------------\n");
+			m = 3;
 		}
 	} while (m == 3);
 }
 
 int login() {
-	char user[20];
-	char pw[20];
-	// count为密码尝试次数
-	int count = 0, i = 0,m;
+	char user[200];
+	char pw[200];
+
+	int count = 0, i = 0, m;// count为密码尝试次数
 
 	//管理员账户密码设定
-	char user1[20] = "yu";
-	char pw1[20] = "666";
+	char user1[200] = "yu";
+	char pw1[200] = "666";
 
-	//登录界面
 	do {
 		//输入用户名和密码
 		printf("=============================================================================\n");
 		printf("Clothing sales Managment System\n");
-		printf("=============================================================================\n");
+		printf("=============================================================================\n\n");
 		printf("【Admin Login】\n");
 		printf("User:");
 		fflush(stdin);
@@ -124,24 +132,25 @@ int login() {
 
 		//判断用户名和密码是否正确，正确跳转管理员界面
 		if (strcmp(user, user1) == 0 && strcmp(pw, pw1) == 0) {
-			m=menu_admin();
+			m = menu_admin();
 			if (m == 3) {
 				return 3;
 			}
 			break;
 		}
+
 		//错误重试
 		else {
-			printf("ACCESS DENIED!\n");
+			printf("ACCESS DENIED!\n\n");
 			count++;
 			system("pause");
 		}
 
 		if (count >= 3) {//尝试次数超过三次，退出程序 
-
-			printf("Program terminated!\n");
+			printf("Program terminated!\n\n");
 			exit(2);
 		}
+		i = 0;
 	} while (1);//无特殊情况一直循环
 }
 
@@ -151,7 +160,6 @@ int menu_admin() {
 	//判断文件存在与否
 	load_menu();
 
-	//菜单界面
 	do {
 		printf("=============================================================================\n");
 		printf("Clothing sales Managment System:>Administrator\n");
@@ -160,13 +168,15 @@ int menu_admin() {
 		printf("3:> Delete Product.\n");
 		printf("4:> Edit Product info.\n");
 		printf("5:> Search Product.\n");
-		printf("6:> Go back.\n");
+		printf("6:> Sort by price from highest to lowest.\n");
+		printf("7:> Sort by price from low to high.\n");
+		printf("8:> Go back.\n");
 		printf("0:> Exit.\n");
+		printf("=============================================================================\n\n");
 		printf("Please enter:");
 		fflush(stdin);
 		scanf("%d", &i);
 
-		//选择功能
 		switch (i) {
 			//显示商品列表
 		case 1:
@@ -193,14 +203,25 @@ int menu_admin() {
 			search_menu();
 			system("pause");
 			break;
-			//返回上一级
+			//按价格从高到低排序
 		case 6:
+			sort_h_l();
+			system("pause");
+			break;
+			//按价格从低到高排序
+		case 7:
+			sort_l_h();
+			system("pause");
+			break;
+			//返回上一级
+		case 8:
 			return 3;
 			//退出程序
 		case 0:
 			exit(4);
 		default:
-			break;
+			printf("\nTry again!\n\n");
+			printf("----------------------------------------------------------------------------------------------------------\n");
 		}
 	} while (1);//无特殊情况一直循环
 }
@@ -211,7 +232,6 @@ int menu_person() {
 	//判断文件存在与否
 	load_menu();
 
-	//菜单界面
 	do {
 		printf("=============================================================================\n");
 		printf("Clothing sales Managment System:>Person\n");
@@ -220,11 +240,11 @@ int menu_person() {
 		printf("3:> Sale Product.\n");
 		printf("4:> Go back.\n");
 		printf("0:> Exit.\n");
+		printf("=============================================================================\n\n");
 		printf("Please enter:");
 		fflush(stdin);
 		scanf("%d", &i);
 
-		//选择功能
 		switch (i) {
 			//跳转到搜索界面
 		case 1:
@@ -248,18 +268,19 @@ int menu_person() {
 		case 0:
 			exit(3);
 		default:
-			break;
+			printf("\nTry again!\n\n");
+			printf("----------------------------------------------------------------------------------------------------------\n");
 		}
 	} while (1);//无特殊情况一直循环
 }
 
 void load_menu() {
 	struct Product* head = NULL;
-	char temp[2];
+	char temp[200];
 
 	//文件存在，输出提示语句
 	if (load(DIR) != NULL) {
-		printf("File Loaded!\n");
+		printf("\nFile Loaded!\n\n");
 	}
 	//文件不存在
 	else {
@@ -294,7 +315,7 @@ struct Product* load(const char* filename) {
 	//文件存在，依次录入链表，返回头节点 head
 	struct Product buf, * head = NULL;
 
-	while (fscanf(fp, "%s %s %s %lf %d", buf.name, buf.color, buf.style, &buf.price, &buf.inventory) > 0) {
+	while (fscanf(fp, "%s %s %s %lf %d\n", buf.name, buf.color, buf.style, &buf.price, &buf.inventory) > 0) {
 		head = add(head, buf.name, buf.color, buf.style, buf.price, buf.inventory);
 	}
 	return head;
@@ -303,33 +324,32 @@ struct Product* load(const char* filename) {
 void showall() {
 	struct Product* head = NULL, * p = NULL;
 
-	//加载文件
 	head = load(DIR);
-	//说明语句
+	
 	printf("=============================================================================\n");
 	printf("Clothing sales Managment System:>ShowALL\n");
 	printf("-----------Result---------\n");
 
 	//循环输出
 	for (p = head; p != NULL; p = p->next) {
+		printf("---------------------------------------------------------------------------------------------\n");
 		printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", p->name, p->color, p->style, p->price, p->inventory);
 	}
 }
 
 void add_menu() {
 	struct Product* head = NULL;
-	char temp1[2];
-	char name[20];
-	char color[20];
-	char style[20];
+	char temp1[200];
+	char name[200];
+	char color[200];
+	char style[200];
 	double price;
-	int inventory;
+	int inventory,n = 0;
 
-	//加载文件
 	head = load(DIR);
-	//提示及说明语句
+
 	printf("=============================================================================\n");
-	printf("Clothing sales Managment System\\Administrator\\AddNewProduct:>\n");
+	printf("Clothing sales Managment System\\Administrator\\AddNewProduct:>\n\n");
 	printf("Please Enter:\n");
 
 	//添加项目，按y继续操作
@@ -337,6 +357,17 @@ void add_menu() {
 		printf("Product Name?\n");
 		fflush(stdin);
 		scanf("%s", name);
+		struct Product* h = head;
+		while (h!=NULL) {
+			if (strcmp(name, h->name) == 0) {
+				printf("The data already exists.\n");
+				n = 1;
+			}
+			h = h->next;
+		}
+		if (n) {
+			continue;
+		}
 		printf("Color?\n");
 		fflush(stdin);
 		scanf("%s", color);
@@ -356,8 +387,6 @@ void add_menu() {
 		scanf("%s", temp1);
 
 	} while (strcmp("Y\0", temp1) == 0 || strcmp("y\0", temp1) == 0);
-
-	//保存到文件
 	save(head, DIR);
 }
 // 向链表以 name 的字典序插入数据，返回值为链表的头节点
@@ -409,18 +438,16 @@ struct Product* add(struct Product* head, char* name, char* color, char* style, 
 	strcpy(cur->style, style);
 	cur->price = price;
 	cur->inventory = inventory;
-
 	return head;
 }
 
 void del_menu() {
 	struct Product* head = NULL;
-	char name[20];
+	char name[200];
 	int ok;
 
-	//加载文件
 	head = load(DIR);
-	//提示及说明语句
+
 	printf("Please enter name of Product you want to Delete:");
 	fflush(stdin);
 	scanf("%s", name);
@@ -434,7 +461,6 @@ void del_menu() {
 	else {
 		printf("FILE DON'T EXIST!\n");
 	}
-	//保存到文件
 	save(head, DIR);
 }
 
@@ -475,13 +501,11 @@ struct Product* del(struct Product* head, const char* name, int* isok) {
 
 void edit_menu() {
 	struct Product* head = NULL, * temp = NULL;
-	char name[20];
+	char name[200];
 	int i;
 
-	//读取文件
-
 	head = load(DIR);
-	//说明及提示语句
+
 	printf("=============================================================================\n");
 	printf("Clothing sales Managment System:>Edit\n");
 	printf("Please enter name of Product you want to Edit:");
@@ -496,7 +520,7 @@ void edit_menu() {
 	//搜索返回值为项目对应节点指针，进行操作
 	else {
 		temp = search(head, name);
-		//提示及说明语句
+
 		printf("Clothing sales Managment System\\Edit\\%s:>\n", temp->name);
 		printf("1:> Edit Product Name\n");
 		printf("2:> Edit Product Color\n");
@@ -508,7 +532,6 @@ void edit_menu() {
 		fflush(stdin);
 		scanf("%d", &i);
 
-		//选择功能
 		switch (i) {
 			//跳转商品名修改界面
 		case 1:
@@ -535,17 +558,16 @@ void edit_menu() {
 		default:
 			break;
 		}
-		//保存到文件
 		save(head, DIR);
 	}
 }
 
-//修改名称。删除原节点，插入临时节点
+//修改名称,删除原节点，插入临时节点
 struct Product* edit_name(struct Product* head, struct Product* temp) {
 	int ok;
-	char name[20];
-	char color[20];
-	char style[20];
+	char name[200];
+	char color[200];
+	char style[200];
 	double price;
 	int inventory;
 
@@ -565,12 +587,12 @@ struct Product* edit_name(struct Product* head, struct Product* temp) {
 	return head;
 }
 
-//修改颜色。
+//修改颜色
 struct Product* edit_color(struct Product* head, struct Product* temp) {
 	int ok;
-	char name[20];
-	char color[20];
-	char style[20];
+	char name[200];
+	char color[200];
+	char style[200];
 	double price;
 	int inventory;
 
@@ -593,9 +615,9 @@ struct Product* edit_color(struct Product* head, struct Product* temp) {
 //修改类型
 struct Product* edit_style(struct Product* head, struct Product* temp) {
 	int ok;
-	char name[20];
-	char color[20];
-	char style[20];
+	char name[200];
+	char color[200];
+	char style[200];
 	double price;
 	int inventory;
 
@@ -634,12 +656,61 @@ struct Product* edit_price(struct Product* head, struct Product* temp) {
 }
 
 void search_menu() {
-	struct Product* head = NULL, * temp = NULL;
-	char name[30];
 
-	//加载文件
+	int i;
+
+	do {
+		printf("=============================================================================\n");
+		printf("Clothing sales Managment System:>Search\n");
+		printf("1:> Direct search.\n");
+		printf("2:> Search by color.\n");
+		printf("3:> Search by style.\n");
+		printf("4:> Color and style composite search.\n");
+		printf("5:> Go back.\n");
+		printf("0:> Exit.\n");
+		printf("Please enter:");
+		fflush(stdin);
+		scanf("%d", &i);
+
+		switch (i) {
+			//直接搜索
+		case 1:
+			search_direct();
+			system("pause");
+			break;
+			//按颜色搜索
+		case 2:
+			search_color();
+			system("pause");
+			break;
+			//按类型搜索
+		case 3:
+			search_style();
+			system("pause");
+			break;
+			//颜色与类型复合搜索
+		case 4:
+			color_style_composite_search();
+			system("pause");
+			break;
+			//返回上一级
+		case 5:
+			return;
+			//退出程序
+		case 0:
+			exit(3);
+		default:
+			break;
+		}
+	} while (1);//无特殊情况一直循环
+}
+
+void search_direct() {
+	struct Product* head = NULL, * temp = NULL;
+	char name[200];
+
 	head = load(DIR);
-	//提示及说明语句
+
 	printf("=============================================================================\n");
 	printf("Clothing sales Managment System:>Search\n");
 	printf("Please enter name of Product you want to Search:");
@@ -653,7 +724,101 @@ void search_menu() {
 	//返回值为项目对应节点指针，输出相关信息
 	else {
 		temp = search(head, name);
-		printf("Name:%-8s Color:%-8s Style:%-8s Price:%-8lf Inventory:%-8d\n", temp->name, temp->color, temp->style, temp->price, temp->inventory);
+		printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", temp->name, temp->color, temp->style, temp->price, temp->inventory);
+	}
+}
+
+void search_color() {
+	struct Product* head = NULL;
+	char color[200];
+	int m = 0;
+
+	head = load(DIR);
+
+	printf("=============================================================================\n");
+	printf("Clothing sales Managment System:>Search\n");
+	printf("Please enter color of Product you want to Search:");
+	fflush(stdin);
+	scanf("%s", color);
+
+	for (struct Product* cur = head; cur != NULL; cur = cur->next)
+	{
+		if (strcmp(color, cur->color) == 0)
+		{
+			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", cur->name, cur->color, cur->style, cur->price, cur->inventory);
+			m++;
+		}
+	}
+	if (m == 0) {
+		printf("ITEM NOT EXIST!");
+		return;
+	}
+	else {
+		printf("There are %d pieces of %s clothing in total.\n", m, color);
+	}
+}
+
+void search_style() {
+	struct Product* head = NULL;
+	char style[200];
+	int m = 0;
+
+	head = load(DIR);
+
+	printf("=============================================================================\n");
+	printf("Clothing sales Managment System:>Search\n");
+	printf("Please enter style of Product you want to Search:");
+	fflush(stdin);
+	scanf("%s", style);
+
+	for (struct Product* cur = head; cur != NULL; cur = cur->next)
+	{
+		if (strcmp(style, cur->style) == 0)
+		{
+			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", cur->name, cur->color, cur->style, cur->price, cur->inventory);
+			m++;
+		}
+	}
+	if (m == 0) {
+		printf("ITEM NOT EXIST!");
+		return;
+	}
+	else {
+		printf("There are %d pieces of %s in total.\n", m, style);
+	}
+}
+
+void color_style_composite_search() {
+	struct Product* head = NULL;
+	char style[200];
+	char color[200];
+	int m = 0;
+
+	head = load(DIR);
+	
+	printf("=============================================================================\n");
+	printf("Clothing sales Managment System:>Search\n");
+	printf("Please enter style of Product you want to Search:");
+	fflush(stdin);
+	scanf("%s", style);
+	printf("Please enter color of Product you want to Search:");
+	fflush(stdin);
+	scanf("%s", color);
+
+	for (struct Product* cur = head; cur != NULL; cur = cur->next)
+	{
+		if ((strcmp(style, cur->style) == 0) && (strcmp(color, cur->color) == 0))
+		{
+			printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", cur->name, cur->color, cur->style, cur->price, cur->inventory);
+			m++;
+		}
+	}
+	if (m == 0) {
+		printf("ITEM NOT EXIST!");
+		return;
+	}
+	else {
+		printf("There are %d pieces of %s %s in total.\n", m, color, style);
 	}
 }
 
@@ -671,13 +836,11 @@ struct Product* search(struct Product* head, const char* name) {
 
 void sale() {
 	struct Product* head = NULL, * temp = NULL;
-	char name[20];
+	char name[200];
 	int i;
 
-	//读取文件
-
 	head = load(DIR);
-	//说明及提示语句
+
 	printf("=============================================================================\n");
 	printf("Clothing sales Managment System:>Sale\n");
 	printf("Please enter name of Product you Sale:");
@@ -687,7 +850,7 @@ void sale() {
 	if (search(head, name) == NULL) {
 		printf("ITEM DON'T EXSIT!\n");
 		system("pause");
-		menu_admin();
+		return;
 	}
 	//搜索返回值为项目对应节点指针，进行操作
 	else {
@@ -700,8 +863,97 @@ void sale() {
 			printf("Error!\n");
 			return;
 		}
-		//保存到文件
 		save(head, DIR);
+	}
+}
+
+void sort_h_l() {
+	struct Product* head = load(DIR);
+	int swapped;
+	struct Product* ptr1,*p , * lptr = NULL;
+
+	if (head == NULL) {
+		return; 
+	}
+	do {
+		swapped = 0;
+		ptr1 = head;
+
+		while (ptr1->next != lptr) {
+			if (ptr1->price < ptr1->next->price) { 
+				double tempPrice = ptr1->price;
+				ptr1->price = ptr1->next->price;
+				ptr1->next->price = tempPrice;
+				int tempInventory = ptr1->inventory;
+				ptr1->inventory = ptr1->next->inventory;
+				ptr1->next->inventory = tempInventory;
+				char tempName[200], tempColor[200], tempStyle[200];
+
+				strcpy(tempName, ptr1->name);
+				strcpy(tempColor, ptr1->color);
+				strcpy(tempStyle, ptr1->style);
+				strcpy(ptr1->name, ptr1->next->name);
+				strcpy(ptr1->color, ptr1->next->color);
+				strcpy(ptr1->style, ptr1->next->style);
+				strcpy(ptr1->next->name, tempName);
+				strcpy(ptr1->next->color, tempColor);
+				strcpy(ptr1->next->style, tempStyle);
+
+				swapped = 1;
+			}
+			ptr1 = ptr1->next;
+		}
+		lptr = ptr1;
+	} while (swapped);
+	printf("Products sorted from lowest to highest price.\n");
+	for (p = head; p != NULL; p = p->next) {
+		printf("---------------------------------------------------------------------------------------------\n");
+		printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", p->name, p->color, p->style, p->price, p->inventory);
+	}
+}
+
+void sort_l_h() {
+	struct Product* head = load(DIR);
+	int swapped;
+	struct Product* ptr1,*p ,* lptr = NULL;
+
+	if (head == NULL) {
+		return; 
+	}
+	do {
+		swapped = 0;
+		ptr1 = head;
+
+		while (ptr1->next != lptr) {
+			if (ptr1->price > ptr1->next->price) { 
+				double tempPrice = ptr1->price;
+				ptr1->price = ptr1->next->price;
+				ptr1->next->price = tempPrice;
+				int tempInventory = ptr1->inventory;
+				ptr1->inventory = ptr1->next->inventory;
+				ptr1->next->inventory = tempInventory;
+				char tempName[200], tempColor[200], tempStyle[200];
+
+				strcpy(tempName, ptr1->name);
+				strcpy(tempColor, ptr1->color);
+				strcpy(tempStyle, ptr1->style);
+				strcpy(ptr1->name, ptr1->next->name);
+				strcpy(ptr1->color, ptr1->next->color);
+				strcpy(ptr1->style, ptr1->next->style);
+				strcpy(ptr1->next->name, tempName);
+				strcpy(ptr1->next->color, tempColor);
+				strcpy(ptr1->next->style, tempStyle);
+
+				swapped = 1;
+			}
+			ptr1 = ptr1->next;
+		}
+		lptr = ptr1;
+	} while (swapped);
+	printf("Products sorted from lowest to highest price.\n");
+	for (p = head; p != NULL; p = p->next) {
+		printf("---------------------------------------------------------------------------------------------\n");
+		printf("Name:%-13s Color:%-13s Style:%-13s Price:%-13lf Inventory:%-13d\n", p->name, p->color, p->style, p->price, p->inventory);
 	}
 }
 
