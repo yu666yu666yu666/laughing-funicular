@@ -377,9 +377,17 @@ void add_menu() {
 		printf("Price?\n");
 		fflush(stdin);
 		scanf("%lf", &price);
+		if(price<=0) {
+			printf("Error!\n");
+			continue;
+		}
 		printf("Inventory?\n");
 		fflush(stdin);
 		scanf("%d", &inventory);
+		if(inventory<0) {
+			printf("Error!\n");
+			continue;
+		}
 		//调用插入添加函数
 		head = add(head, name, color, style, price, inventory);
 		printf("Countinue?(y/n)\n");
