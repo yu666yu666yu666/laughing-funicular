@@ -62,13 +62,13 @@ void menu() {
 	do {
 		m = 0;
 
-		printf("Clothing sales Managment System[version: 38]\n");
-		printf("yu\n\n\n");
-
+		printf("Clothing Sales Managment System\n");
+		printf("Yu's system\n\n");
 		printf("=============================================================================\n");
 		printf("1:> Administrator.\n");
 		printf("2:> Person.\n");
 		printf("0:> Exit.\n");
+		printf("=============================================================================\n\n");
 		printf("Please enter:");
 		fflush(stdin);
 		scanf("%d", &i);
@@ -86,7 +86,9 @@ void menu() {
 		case 0:
 			exit(1);
 		default:
-			break;
+			printf("\nTry again!\n\n");
+			printf("----------------------------------------------------------------------------------------------------------\n");
+			m = 3;
 		}
 	} while (m == 3);
 }
@@ -105,7 +107,7 @@ int login() {
 		//输入用户名和密码
 		printf("=============================================================================\n");
 		printf("Clothing sales Managment System\n");
-		printf("=============================================================================\n");
+		printf("=============================================================================\n\n");
 		printf("【Admin Login】\n");
 		printf("User:");
 		fflush(stdin);
@@ -139,13 +141,13 @@ int login() {
 
 		//错误重试
 		else {
-			printf("ACCESS DENIED!\n");
+			printf("ACCESS DENIED!\n\n");
 			count++;
 			system("pause");
 		}
 
 		if (count >= 3) {//尝试次数超过三次，退出程序 
-			printf("Program terminated!\n");
+			printf("Program terminated!\n\n");
 			exit(2);
 		}
 		i = 0;
@@ -170,6 +172,7 @@ int menu_admin() {
 		printf("7:> Sort by price from low to high.\n");
 		printf("8:> Go back.\n");
 		printf("0:> Exit.\n");
+		printf("=============================================================================\n\n");
 		printf("Please enter:");
 		fflush(stdin);
 		scanf("%d", &i);
@@ -217,7 +220,8 @@ int menu_admin() {
 		case 0:
 			exit(4);
 		default:
-			break;
+			printf("\nTry again!\n\n");
+			printf("----------------------------------------------------------------------------------------------------------\n");
 		}
 	} while (1);//无特殊情况一直循环
 }
@@ -236,6 +240,7 @@ int menu_person() {
 		printf("3:> Sale Product.\n");
 		printf("4:> Go back.\n");
 		printf("0:> Exit.\n");
+		printf("=============================================================================\n\n");
 		printf("Please enter:");
 		fflush(stdin);
 		scanf("%d", &i);
@@ -263,7 +268,8 @@ int menu_person() {
 		case 0:
 			exit(3);
 		default:
-			break;
+			printf("\nTry again!\n\n");
+			printf("----------------------------------------------------------------------------------------------------------\n");
 		}
 	} while (1);//无特殊情况一直循环
 }
@@ -274,7 +280,7 @@ void load_menu() {
 
 	//文件存在，输出提示语句
 	if (load(DIR) != NULL) {
-		printf("File Loaded!\n");
+		printf("\nFile Loaded!\n\n");
 	}
 	//文件不存在
 	else {
@@ -343,7 +349,7 @@ void add_menu() {
 	head = load(DIR);
 
 	printf("=============================================================================\n");
-	printf("Clothing sales Managment System\\Administrator\\AddNewProduct:>\n");
+	printf("Clothing sales Managment System\\Administrator\\AddNewProduct:>\n\n");
 	printf("Please Enter:\n");
 
 	//添加项目，按y继续操作
@@ -833,7 +839,7 @@ void sale() {
 	if (search(head, name) == NULL) {
 		printf("ITEM DON'T EXSIT!\n");
 		system("pause");
-		menu_admin();
+		return;
 	}
 	//搜索返回值为项目对应节点指针，进行操作
 	else {
