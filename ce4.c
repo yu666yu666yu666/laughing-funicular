@@ -13,9 +13,9 @@
 */
 
 struct Product {
-	char name[20]; //名字
-	char color[20]; //颜色
-	char style[20]; //类型风格
+	char name[200]; //名字
+	char color[200]; //颜色
+	char style[200]; //类型风格
 	double price; // 价格
 	int inventory; // 库存
 	struct Product* next;
@@ -94,14 +94,14 @@ void menu() {
 }
 
 int login() {
-	char user[20];
-	char pw[20];
+	char user[200];
+	char pw[200];
 
 	int count = 0, i = 0, m;// count为密码尝试次数
 
 	//管理员账户密码设定
-	char user1[20] = "yu";
-	char pw1[20] = "666";
+	char user1[200] = "yu";
+	char pw1[200] = "666";
 
 	do {
 		//输入用户名和密码
@@ -150,7 +150,9 @@ int login() {
 			printf("Program terminated!\n\n");
 			exit(2);
 		}
+
 		i = 0;
+
 	} while (1);//无特殊情况一直循环
 }
 
@@ -276,7 +278,7 @@ int menu_person() {
 
 void load_menu() {
 	struct Product* head = NULL;
-	char temp[2];
+	char temp[200];
 
 	//文件存在，输出提示语句
 	if (load(DIR) != NULL) {
@@ -311,7 +313,6 @@ struct Product* load(const char* filename) {
 	if (fp == NULL) {
 		return NULL;
 	}
-
 	//文件存在，依次录入链表，返回头节点 head
 	struct Product buf, * head = NULL;
 
@@ -329,7 +330,6 @@ void showall() {
 	printf("=============================================================================\n");
 	printf("Clothing sales Managment System:>ShowALL\n");
 	printf("-----------Result---------\n");
-
 	//循环输出
 	for (p = head; p != NULL; p = p->next) {
 		printf("---------------------------------------------------------------------------------------------\n");
@@ -339,10 +339,10 @@ void showall() {
 
 void add_menu() {
 	struct Product* head = NULL;
-	char temp1[2];
-	char name[20];
-	char color[20];
-	char style[20];
+	char temp1[200];
+	char name[200];
+	char color[200];
+	char style[200];
 	double price;
 	int inventory,n = 0;
 
@@ -391,8 +391,8 @@ void add_menu() {
 }
 // 向链表以 name 的字典序插入数据，返回值为链表的头节点
 struct Product* add(struct Product* head, char* name, char* color, char* style, double price, int inventory) {
-	// cur 为新增节点
-	struct Product* cur = head, * prev = NULL;
+	
+	struct Product* cur = head, * prev = NULL;// cur 为新增节点
 
 	// 第一种情况，当 head == NULL 时，链表还没有创建，创建新链表
 	if (cur == NULL) {
@@ -404,17 +404,14 @@ struct Product* add(struct Product* head, char* name, char* color, char* style, 
 			if (strcmp(name, cur->name) < 0) {
 				break;
 			}
-
 			prev = cur;
 		}
-
 		// 第二种情况，当第一个节点比要插入节点大，待插入节点变为头节点
 		if (prev == NULL) {
 			struct Product* new_head = calloc(1, sizeof(struct Product));
 			new_head->next = head;
 			cur = head = new_head;
 		}
-
 		else {
 			// 第三种情况，当要插入的节点位于中间
 			if (prev != NULL && cur != NULL) {
@@ -431,7 +428,6 @@ struct Product* add(struct Product* head, char* name, char* color, char* style, 
 			}
 		}
 	}
-
 	// 开始赋值，填数据
 	strcpy(cur->name, name);
 	strcpy(cur->color, color);
@@ -443,7 +439,7 @@ struct Product* add(struct Product* head, char* name, char* color, char* style, 
 
 void del_menu() {
 	struct Product* head = NULL;
-	char name[20];
+	char name[200];
 	int ok;
 
 	head = load(DIR);
@@ -452,13 +448,8 @@ void del_menu() {
 	fflush(stdin);
 	scanf("%s", name);
 	head = del(head, name, &ok);
-
-	//ok = 1，删除成功
-	if (ok) {
-		;
-	}
-	//ok = 0, 删除失败，说明项目不存在，输出提示语句
-	else {
+	//是否成功删除
+	if(!ok) {
 		printf("FILE DON'T EXIST!\n");
 	}
 	save(head, DIR);
@@ -467,7 +458,6 @@ void del_menu() {
 struct Product* del(struct Product* head, const char* name, int* isok) {
 	// cur 为要删除的节点
 	struct Product* cur = head, * prev = NULL;
-
 	// 找到待删除节点 cur 和前一个节点 prev
 	for (; cur != NULL; cur = cur->next) {
 		if (strcmp(name, cur->name) == 0) {
@@ -475,13 +465,11 @@ struct Product* del(struct Product* head, const char* name, int* isok) {
 		}
 		prev = cur;
 	}
-
 	//项目不存在，删除失败，返回头指针
 	if (cur == NULL) {
 		*isok = 0;
 		return head;
 	}
-
 	// 第一种情况，要删除的是第一个节点，返回新的头指针
 	if (prev == NULL) {
 		struct Product* new_head = cur->next;
@@ -493,7 +481,6 @@ struct Product* del(struct Product* head, const char* name, int* isok) {
 		prev->next = cur->next;
 		free(cur);
 	}
-
 	//上述两种情况说明成功删除
 	*isok = 1;
 	return head;
@@ -501,7 +488,7 @@ struct Product* del(struct Product* head, const char* name, int* isok) {
 
 void edit_menu() {
 	struct Product* head = NULL, * temp = NULL;
-	char name[20];
+	char name[200];
 	int i;
 
 	head = load(DIR);
@@ -511,11 +498,10 @@ void edit_menu() {
 	printf("Please enter name of Product you want to Edit:");
 	fflush(stdin);
 	scanf("%s", name);
-	//搜索返回值为 NULL ，项目不存在，跳转管理员菜单
+	//搜索返回值为 NULL ，项目不存在
 	if (search(head, name) == NULL) {
 		printf("ITEM DON'T EXSIT!\n");
 		system("pause");
-		menu_admin();
 	}
 	//搜索返回值为项目对应节点指针，进行操作
 	else {
@@ -565,9 +551,9 @@ void edit_menu() {
 //修改名称,删除原节点，插入临时节点
 struct Product* edit_name(struct Product* head, struct Product* temp) {
 	int ok;
-	char name[20];
-	char color[20];
-	char style[20];
+	char name[200];
+	char color[200];
+	char style[200];
 	double price;
 	int inventory;
 
@@ -589,57 +575,28 @@ struct Product* edit_name(struct Product* head, struct Product* temp) {
 
 //修改颜色
 struct Product* edit_color(struct Product* head, struct Product* temp) {
-	int ok;
-	char name[20];
-	char color[20];
-	char style[20];
-	double price;
-	int inventory;
+	char color[200];
 
 	printf("Please enter Color to replace %s:\n", temp->color);
-	//将原信息复制到临时变量上
-	strcpy(name, temp->name);
-	strcpy(color, temp->color);
-	strcpy(style, temp->style);
-	price = temp->price;
-	inventory = temp->inventory;
-	//删除原节点
-	head = del(head, temp->name, &ok);
 	fflush(stdin);
 	scanf("%s", color);
-	//插入临时节点
-	head = add(head, name, color, style, price, inventory);
+	strcpy(temp->color, color);
 	return head;
 }
 
 //修改类型
 struct Product* edit_style(struct Product* head, struct Product* temp) {
-	int ok;
-	char name[20];
-	char color[20];
-	char style[20];
-	double price;
-	int inventory;
+	char style[200];
 
 	printf("Please enter Style to replace %s:\n", temp->style);
-	//将原信息复制到临时变量上
-	strcpy(name, temp->name);
-	strcpy(color, temp->color);
-	strcpy(style, temp->style);
-	price = temp->price;
-	inventory = temp->inventory;
-	//删除原节点
-	head = del(head, temp->name, &ok);
 	fflush(stdin);
 	scanf("%s", style);
-	//插入临时节点
-	head = add(head, name, color, style, price, inventory);
+	strcpy(temp->style, style);
 	return head;
 }
 
 //修改库存
 struct Product* edit_inventory(struct Product* head, struct Product* temp) {
-	printf("Inventory?\n");
 	printf("Please enter Inventory to replace %d:\n", temp->inventory);
 	fflush(stdin);
 	scanf("%d", &temp->inventory);
@@ -648,7 +605,6 @@ struct Product* edit_inventory(struct Product* head, struct Product* temp) {
 
 //修改价格
 struct Product* edit_price(struct Product* head, struct Product* temp) {
-	printf("Price?\n");
 	printf("Please enter Price to replace %lf:\n", temp->price);
 	fflush(stdin);
 	scanf("%lf", &temp->price);
@@ -656,7 +612,6 @@ struct Product* edit_price(struct Product* head, struct Product* temp) {
 }
 
 void search_menu() {
-
 	int i;
 
 	do {
@@ -707,7 +662,7 @@ void search_menu() {
 
 void search_direct() {
 	struct Product* head = NULL, * temp = NULL;
-	char name[30];
+	char name[200];
 
 	head = load(DIR);
 
@@ -730,7 +685,7 @@ void search_direct() {
 
 void search_color() {
 	struct Product* head = NULL;
-	char color[30];
+	char color[200];
 	int m = 0;
 
 	head = load(DIR);
@@ -760,7 +715,7 @@ void search_color() {
 
 void search_style() {
 	struct Product* head = NULL;
-	char style[30];
+	char style[200];
 	int m = 0;
 
 	head = load(DIR);
@@ -790,8 +745,8 @@ void search_style() {
 
 void color_style_composite_search() {
 	struct Product* head = NULL;
-	char style[30];
-	char color[30];
+	char style[200];
+	char color[200];
 	int m = 0;
 
 	head = load(DIR);
@@ -836,7 +791,7 @@ struct Product* search(struct Product* head, const char* name) {
 
 void sale() {
 	struct Product* head = NULL, * temp = NULL;
-	char name[20];
+	char name[200];
 	int i;
 
 	head = load(DIR);
@@ -846,7 +801,7 @@ void sale() {
 	printf("Please enter name of Product you Sale:");
 	fflush(stdin);
 	scanf("%s", name);
-	//搜索返回值为 NULL ，项目不存在，跳转管理员菜单
+	//搜索返回值为 NULL ，项目不存在
 	if (search(head, name) == NULL) {
 		printf("ITEM DON'T EXSIT!\n");
 		system("pause");
@@ -884,17 +839,21 @@ void sort_h_l() {
 				double tempPrice = ptr1->price;
 				ptr1->price = ptr1->next->price;
 				ptr1->next->price = tempPrice;
+
 				int tempInventory = ptr1->inventory;
 				ptr1->inventory = ptr1->next->inventory;
 				ptr1->next->inventory = tempInventory;
-				char tempName[20], tempColor[20], tempStyle[20];
+
+				char tempName[200], tempColor[200], tempStyle[200];
 
 				strcpy(tempName, ptr1->name);
 				strcpy(tempColor, ptr1->color);
 				strcpy(tempStyle, ptr1->style);
+
 				strcpy(ptr1->name, ptr1->next->name);
 				strcpy(ptr1->color, ptr1->next->color);
 				strcpy(ptr1->style, ptr1->next->style);
+
 				strcpy(ptr1->next->name, tempName);
 				strcpy(ptr1->next->color, tempColor);
 				strcpy(ptr1->next->style, tempStyle);
@@ -929,17 +888,21 @@ void sort_l_h() {
 				double tempPrice = ptr1->price;
 				ptr1->price = ptr1->next->price;
 				ptr1->next->price = tempPrice;
+
 				int tempInventory = ptr1->inventory;
 				ptr1->inventory = ptr1->next->inventory;
 				ptr1->next->inventory = tempInventory;
-				char tempName[20], tempColor[20], tempStyle[20];
+
+				char tempName[200], tempColor[200], tempStyle[200];
 
 				strcpy(tempName, ptr1->name);
 				strcpy(tempColor, ptr1->color);
 				strcpy(tempStyle, ptr1->style);
+
 				strcpy(ptr1->name, ptr1->next->name);
 				strcpy(ptr1->color, ptr1->next->color);
 				strcpy(ptr1->style, ptr1->next->style);
+				
 				strcpy(ptr1->next->name, tempName);
 				strcpy(ptr1->next->color, tempColor);
 				strcpy(ptr1->next->style, tempStyle);
